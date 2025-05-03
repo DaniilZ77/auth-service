@@ -1,0 +1,7 @@
+http_port: 0.0.0.0:8080
+jwt_secret: secret
+access_token_ttl: 2m
+refresh_token_ttl: 10h
+db_url: postgres://postgres:postgres@localhost:5432/auth
+log_level: debug
+webhook_url: https://webhook.site/1f1b0e5d-6af8-4dc7-8b88-7cbfc8463f36
