@@ -1,0 +1,179 @@
+basePath: /api/v1
+definitions:
+  models.Response:
+    properties:
+      data: {}
+      status:
+        type: string
+    type: object
+  models.TokenRequest:
+    properties:
+      refresh_token:
+        example: 1fe0f4a0-9de9-4192-93b8-1a702b1eda2d
+        type: string
+    type: object
+  models.TokensResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: This is the API for the Auth Service.
+  title: Auth Service API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login with user id
+      operationId: login
+      parameters:
+      - description: user id
+        example: 1fe0f4a0-9de9-4192-93b8-1a702b1eda2d
+        format: uuid
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TokensResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Login
+      tags:
+      - Auth
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout with access token
+      operationId: logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuthBasic: []
+      summary: Logout
+      tags:
+      - Auth
+  /me:
+    get:
+      consumes:
+      - application/json
+      description: Get user id from access token
+      operationId: me
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuthBasic: []
+      summary: Get user id
+      tags:
+      - Me
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: Check health of the service
+      operationId: ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Ping
+      tags:
+      - Ping
+  /token/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh tokens with both access and refresh tokens
+      operationId: refresh
+      parameters:
+      - description: refresh token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          $ref: '#/definitions/models.TokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.TokensResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuthBasic: []
+      summary: Refresh
+      tags:
+      - Auth
+securityDefinitions:
+  ApiKeyAuthBasic:
+    description: Authorization token in the format "Bearer your_token". Also can use
+      without "Bearer", just "your_token"
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
