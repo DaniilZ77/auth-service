@@ -141,12 +141,6 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.Response"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
@@ -284,7 +278,7 @@ const docTemplate = `{
     },
     "securityDefinitions": {
         "ApiKeyAuthBasic": {
-            "description": "Authorization token in the format \"Bearer your_token\"",
+            "description": "Authorization token in the format \"Bearer your_token\". Also can use without \"Bearer\", just \"your_token\"",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

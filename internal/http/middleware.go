@@ -21,7 +21,6 @@ func (r *router) getAuthorizationHeader(w http.ResponseWriter, req *http.Request
 	token := req.Header.Get("authorization")
 	token = strings.TrimSpace(token)
 	token = strings.TrimPrefix(token, "Bearer ")
-	token = strings.TrimPrefix(token, "bearer ")
 	if token == "" {
 		r.log.Warn("authorization token empty")
 		r.response(w, http.StatusUnauthorized, models.NewErrorResponse("authorization token empty"))

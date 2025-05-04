@@ -23,7 +23,7 @@ import (
 // @securityDefinitions.apiKey	ApiKeyAuthBasic
 // @in							header
 // @name						Authorization
-// @description				Authorization token in the format "Bearer your_token"
+// @description				Authorization token in the format "Bearer your_token". Also can use without "Bearer", just "your_token"
 func main() {
 	config := config.MustConfig()
 	log := newLogger(config.LogLevel)

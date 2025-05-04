@@ -102,10 +102,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.Response'
         "401":
           description: Unauthorized
           schema:
@@ -175,7 +171,8 @@ paths:
       - Auth
 securityDefinitions:
   ApiKeyAuthBasic:
-    description: Authorization token in the format "Bearer your_token"
+    description: Authorization token in the format "Bearer your_token". Also can use
+      without "Bearer", just "your_token"
     in: header
     name: Authorization
     type: apiKey

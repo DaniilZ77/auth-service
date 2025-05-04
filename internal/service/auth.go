@@ -101,7 +101,7 @@ func (a *AuthService) newSession(refreshToken string, requestMeta *models.Reques
 		RefreshTokenHash: string(refreshTokenHash),
 		UserAgent:        requestMeta.UserAgent,
 		IpAddress:        requestMeta.IP,
-		Expiry:           time.Now().Add(a.refreshTokenTTL),
+		Expiry:           time.Now().UTC().Add(a.refreshTokenTTL),
 	}, nil
 }
 
@@ -126,6 +126,8 @@ func (a *AuthService) Login(ctx context.Context, userID string, requestMeta *mod
 		return nil, err
 	}
 
+	a.log.Debug("new session created", slog.Any("session", newSession))
+
 	return tokens, nil
 }
 
@@ -136,7 +138,7 @@ func (a *AuthService) validateSession(
 	if oldSession.IsRevoked {
 		return &models.DomainError{Err: models.ErrSessionRevoked}
 	}
-	if oldSession.Expiry.Before(time.Now()) {
+	if oldSession.Expiry.Before(time.Now().UTC()) {
 		return &models.DomainError{Err: models.ErrSessionExpired}
 	}
 	if oldSession.UserAgent != requestMeta.UserAgent {
@@ -190,6 +192,8 @@ func (a *AuthService) RefreshToken(ctx context.Context, oldTokens *models.Tokens
 	if err != nil {
 		return nil, err
 	}
+
+	a.log.Debug("session found", slog.Any("session", oldSession))
 
 	if err := a.validateSession(oldTokens, requestMeta, oldSession); err != nil {
 		if errors.Is(err, models.ErrUserAgentMismatch) {

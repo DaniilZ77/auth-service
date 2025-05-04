@@ -9,7 +9,7 @@ access_token_ttl: 2m
 refresh_token_ttl: 10h
 db_url: postgres://postgres:postgres@auth-postgres:5432/auth
 log_level: info
-webhook_url: http://localhost:9090/webhook // вебхук, на который отправляется информация, если ip адреса не совпадают
+webhook_url: http://localhost:9090/webhook // вебхук, на который отправляется информация, если ip адреса не совпадают, при запуске докера также поднимается сервер с этим эндпоинтом и логирует тело запроса
 ```
 
 **Также обязательно нужно создать .env**:
