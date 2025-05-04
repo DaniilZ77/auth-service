@@ -47,6 +47,8 @@ func newDependencies(t *testing.T) *dependencies {
 }
 
 func TestLogin(t *testing.T) {
+	t.Parallel()
+
 	deps := newDependencies(t)
 
 	userID := uuid.NewString()
@@ -74,6 +76,8 @@ func TestLogin(t *testing.T) {
 }
 
 func TestLoginFail(t *testing.T) {
+	t.Parallel()
+
 	deps := newDependencies(t)
 
 	tests := []struct {
@@ -105,6 +109,8 @@ func TestLoginFail(t *testing.T) {
 }
 
 func TestCheckSession(t *testing.T) {
+	t.Parallel()
+
 	deps := newDependencies(t)
 
 	sessionID := uuid.NewString()
@@ -115,6 +121,8 @@ func TestCheckSession(t *testing.T) {
 }
 
 func TestCheckSessionFail(t *testing.T) {
+	t.Parallel()
+
 	deps := newDependencies(t)
 
 	deps.sessionBlacklist.EXPECT().In(mock.Anything).Return(true).Once()
@@ -123,6 +131,8 @@ func TestCheckSessionFail(t *testing.T) {
 }
 
 func TestLogout(t *testing.T) {
+	t.Parallel()
+
 	deps := newDependencies(t)
 
 	sessionID := uuid.NewString()
@@ -134,6 +144,8 @@ func TestLogout(t *testing.T) {
 }
 
 func TestLogoutFail(t *testing.T) {
+	t.Parallel()
+
 	deps := newDependencies(t)
 
 	deps.sessionStorage.EXPECT().RevokeSession(mock.Anything, mock.Anything).Return(errors.New("failed to revoke session")).Once()
@@ -142,6 +154,8 @@ func TestLogoutFail(t *testing.T) {
 }
 
 func TestRefreshToken(t *testing.T) {
+	t.Parallel()
+
 	deps := newDependencies(t)
 
 	oldSessionID := uuid.NewString()
@@ -185,6 +199,8 @@ func TestRefreshToken(t *testing.T) {
 }
 
 func TestRefreshTokenFail(t *testing.T) {
+	t.Parallel()
+
 	deps := newDependencies(t)
 
 	refreshToken := uuid.NewString()

@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 )
 
-//go:generate mockery --name=AuthService --case=snake --inpackage --inpackage-suffix --with-expecter
 type AuthService interface {
 	Login(ctx context.Context, userID string, requestMeta *domain.RequestMeta) (tokens *domain.TokensInfo, err error)
 	RefreshToken(ctx context.Context, oldTokens *domain.TokensInfo, requestMeta *domain.RequestMeta) (newTokens *domain.TokensInfo, err error)
@@ -21,7 +20,6 @@ type AuthService interface {
 	CheckSession(ctx context.Context, sessionID string) error
 }
 
-//go:generate mockery --name=TokenHandler --case=snake --inpackage --inpackage-suffix --with-expecter
 type TokenHandler interface {
 	ParseToken(token string) (*models.TokenClaims, error)
 }
