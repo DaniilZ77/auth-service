@@ -1,8 +1,10 @@
 services:
-  backend:
+  backend-auth:
     container_name: auth-backend
     restart: always
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file:
       - .env
     ports:
@@ -14,6 +16,14 @@ services:
         condition: service_healthy
       migrate:
         condition: service_started
+  backend-webhook:
+    container_name: webhook-backend
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.webhook
+    networks:
+      - auth-net
   migrate:
     image: migrate/migrate
     container_name: auth-migrate

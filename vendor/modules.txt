@@ -70,6 +70,7 @@ github.com/stretchr/objx
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/assert/yaml
 github.com/stretchr/testify/mock
+github.com/stretchr/testify/require
 # github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
 ## explicit; go 1.15
 github.com/swaggo/files

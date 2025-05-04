@@ -20,11 +20,12 @@ const (
 func (r *router) getAuthorizationHeader(w http.ResponseWriter, req *http.Request) (string, error) {
 	token := req.Header.Get("authorization")
 	token = strings.TrimSpace(token)
+	token = strings.TrimPrefix(token, "Bearer ")
 	token = strings.TrimPrefix(token, "bearer ")
 	if token == "" {
-		r.log.Error("authorization header is empty")
-		r.response(w, http.StatusUnauthorized, models.NewErrorResponse("authorization header is empty"))
-		return "", errors.New("authorization header is empty")
+		r.log.Warn("authorization token empty")
+		r.response(w, http.StatusUnauthorized, models.NewErrorResponse("authorization token empty"))
+		return "", errors.New("authorization token empty")
 	}
 	return token, nil
 }

@@ -55,6 +55,7 @@ func (r *router) getTokenClaims(w http.ResponseWriter, req *http.Request) (*mode
 // @Produce		json
 // @Success		200	{object}	models.Response
 // @Failure		400	{object}	models.Response
+// @Failure		401	{object}	models.Response
 // @Router			/me [get]
 func (r *router) me(w http.ResponseWriter, req *http.Request) {
 	tokenClaims, err := r.getTokenClaims(w, req)
@@ -170,6 +171,7 @@ func (r *router) refreshToken(w http.ResponseWriter, req *http.Request) {
 // @Accept			json
 // @Produce		json
 // @Success		200	{object}	models.Response
+// @Failure		401	{object}	models.Response
 // @Failure		500	{object}	models.Response
 // @Router			/logout [post]
 func (r *router) logout(w http.ResponseWriter, req *http.Request) {

@@ -9,6 +9,6 @@ WORKDIR /app
 COPY --from=builder ./app/bin ./bin
 COPY --from=builder ./app/config ./config
 
-HEALTHCHECK --interval=30s --timeout=1m --start-period=30s --start-interval=10s --retries=2 CMD curl -f http://localhost:8081/v1/api/ping
+HEALTHCHECK --interval=30s --timeout=1m --start-period=30s --start-interval=10s --retries=2 CMD curl -f http://localhost:8081/api/v1/ping
 
 ENTRYPOINT ["./bin/auth"]

@@ -23,5 +23,6 @@ func main() {
 		defer r.Body.Close() // nolint
 		log.Printf("Received webhook: UserID: %s, OldIP: %s, NewIP: %s\n", webhookInfo.UserID, webhookInfo.OldIP, webhookInfo.NewIP)
 	})
+	log.Println("Webhook backend started on port :9091")
 	log.Fatal(http.ListenAndServe(":9091", nil))
 }

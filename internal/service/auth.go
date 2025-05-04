@@ -18,6 +18,7 @@ import (
 const (
 	defaultSendWebhookRetries = 3
 	defaultSendWebhookDelay   = time.Second
+	defaultBcryptCost         = 8
 )
 
 //go:generate mockery --name=SessionStorage --case=snake --inpackage --inpackage-suffix --with-expecter
@@ -89,7 +90,7 @@ func NewAuthService(
 }
 
 func (a *AuthService) newSession(refreshToken string, requestMeta *models.RequestMeta) (*models.Session, error) {
-	refreshTokenHash, err := bcrypt.GenerateFromPassword([]byte(refreshToken), bcrypt.DefaultCost)
+	refreshTokenHash, err := bcrypt.GenerateFromPassword([]byte(refreshToken), defaultBcryptCost)
 	if err != nil {
 		a.log.Error("failed to create session", slog.Any("error", err))
 		return nil, fmt.Errorf("failed to create session: %w", err)
@@ -128,7 +129,7 @@ func (a *AuthService) Login(ctx context.Context, userID string, requestMeta *mod
 	return tokens, nil
 }
 
-func (a *AuthService) validateSessions(
+func (a *AuthService) validateSession(
 	oldTokens *models.TokensInfo,
 	requestMeta *models.RequestMeta,
 	oldSession *models.Session) error {
@@ -190,7 +191,7 @@ func (a *AuthService) RefreshToken(ctx context.Context, oldTokens *models.Tokens
 		return nil, err
 	}
 
-	if err := a.validateSessions(oldTokens, requestMeta, oldSession); err != nil {
+	if err := a.validateSession(oldTokens, requestMeta, oldSession); err != nil {
 		if errors.Is(err, models.ErrUserAgentMismatch) {
 			if err := a.Logout(ctx, oldSession.ID); err != nil {
 				a.log.Error("failed to logout", slog.Any("error", err))
