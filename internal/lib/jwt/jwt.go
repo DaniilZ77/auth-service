@@ -52,7 +52,7 @@ func (th *TokenHandler) NewToken(userID, sessionID string) (string, error) {
 	tokenClaims := &models.TokenClaims{}
 	tokenClaims.UserID = userID
 	tokenClaims.SessionID = sessionID
-	tokenClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(th.ttl))
+	tokenClaims.ExpiresAt = jwt.NewNumericDate(time.Now().UTC().Add(th.ttl))
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS512, tokenClaims)
 	token, err := jwtToken.SignedString([]byte(th.secret))
