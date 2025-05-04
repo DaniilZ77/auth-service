@@ -4,4 +4,4 @@ access_token_ttl: 2m
 refresh_token_ttl: 10h
 db_url: postgres://postgres:postgres@auth-postgres:5432/auth
 log_level: info
-webhook_url: http://localhost:9090/webhook
+webhook_url: http://localhost:9091/webhook

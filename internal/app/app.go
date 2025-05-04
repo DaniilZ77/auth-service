@@ -20,7 +20,7 @@ import (
 const (
 	defaultAccessTokenTTL  = 2 * time.Minute
 	defaultRefreshTokenTTL = 10 * time.Hour
-	defaultHttpPort        = ":8080"
+	defaultHttpPort        = "0.0.0.0:8081"
 )
 
 type App struct {
