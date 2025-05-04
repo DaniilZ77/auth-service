@@ -104,6 +104,7 @@ func (a *AuthService) newSession(refreshToken string, requestMeta *models.Reques
 	}, nil
 }
 
+// Create new session with access token and refresh token, save session in database and return tokens
 func (a *AuthService) Login(ctx context.Context, userID string, requestMeta *models.RequestMeta) (tokens *models.TokensInfo, err error) {
 	tokens = &models.TokensInfo{}
 
@@ -182,6 +183,7 @@ func (a *AuthService) sendWebhook(payload map[string]string) {
 	}
 }
 
+// Get session from database by session id from access token that came from the request, validate it, check if ip addresses from current session and session in database are not equal, then send data on webhook. Generate new session, invalidate old one and insert new.
 func (a *AuthService) RefreshToken(ctx context.Context, oldTokens *models.TokensInfo, requestMeta *models.RequestMeta) (newTokens *models.TokensInfo, err error) {
 	oldSession, err := a.sessionStorage.GetSessionByID(ctx, oldTokens.SessionID)
 	if err != nil {
@@ -227,6 +229,7 @@ func (a *AuthService) RefreshToken(ctx context.Context, oldTokens *models.Tokens
 	}, nil
 }
 
+// Invalidate session in database by session id and add session id in blacklist to protect from using same access token in the future
 func (a *AuthService) Logout(ctx context.Context, sessionID string) error {
 	if err := a.sessionStorage.RevokeSession(ctx, sessionID); err != nil {
 		return err
@@ -236,6 +239,7 @@ func (a *AuthService) Logout(ctx context.Context, sessionID string) error {
 	return nil
 }
 
+// Check if provided session id in black list
 func (a *AuthService) CheckSession(ctx context.Context, sessionID string) error {
 	if a.sessionBlacklist.In(sessionID) {
 		return &models.DomainError{Err: models.ErrSessionRevoked}

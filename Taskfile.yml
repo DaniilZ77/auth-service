@@ -8,9 +8,12 @@ vars:
   CONFIG_PATH: ./config/local.yaml
 
 tasks:
-  run:
+  run-auth:
     cmds:
       - CONFIG_PATH={{.CONFIG_PATH}} go run ./cmd/auth
+  run-webhook:
+    cmds:
+      - go run ./cmd/webhook
   build:
     cmds:
       - go build -o ./bin/auth ./cmd/auth

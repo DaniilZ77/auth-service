@@ -29,6 +29,7 @@ func NewSessionStore(db *postgres.Postgres, log *slog.Logger) (*SessionStore, er
 	}, nil
 }
 
+// Get session by session id
 func (s *SessionStore) GetSessionByID(ctx context.Context, sessionID string) (*models.Session, error) {
 	session := &models.Session{}
 	err := s.db.DB.QueryRowContext(
@@ -56,6 +57,7 @@ func (s *SessionStore) GetSessionByID(ctx context.Context, sessionID string) (*m
 	return session, nil
 }
 
+// Insert a new session
 func (s *SessionStore) NewSession(ctx context.Context, session *models.Session) error {
 	_, err := s.db.DB.ExecContext(
 		ctx,
@@ -73,6 +75,7 @@ func (s *SessionStore) NewSession(ctx context.Context, session *models.Session) 
 	return nil
 }
 
+// In a transaction mark is_revoked as true and insert a new session
 func (s *SessionStore) RotateSession(ctx context.Context, oldSessionID string, newSession *models.Session) error {
 	fail := func(err error) error {
 		s.log.Error("failed to rotate session", slog.Any("error", err))
@@ -110,6 +113,7 @@ func (s *SessionStore) RotateSession(ctx context.Context, oldSessionID string, n
 	return nil
 }
 
+// Mark is_revoked as true and update updated_at
 func (s *SessionStore) RevokeSession(ctx context.Context, sessionID string) error {
 	_, err := s.db.DB.ExecContext(
 		ctx,

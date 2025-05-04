@@ -3,18 +3,12 @@ package http
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 
 	_ "github.com/DaniilZ77/auth-service/docs"
 	"github.com/DaniilZ77/auth-service/internal/models"
 	httpSwagger "github.com/swaggo/http-swagger"
-)
-
-const (
-	canExpire    = true
-	cannotExpire = false
 )
 
 type router struct {
@@ -50,14 +44,14 @@ func NewRouter(
 		tokenHandler: tokenHandler,
 		log:          log,
 	}
-	mux.HandleFunc("GET /api/v1/ping", r.ping)
-	mux.HandleFunc("GET /api/v1/me", r.protectedMiddleware(r.me, cannotExpire))
-	mux.HandleFunc("POST /api/v1/login", r.login)
-	mux.HandleFunc("POST /api/v1/token/refresh", r.protectedMiddleware(r.refreshToken, canExpire))
-	mux.HandleFunc("POST /api/v1/logout", r.protectedMiddleware(r.logout, cannotExpire))
-	mux.HandleFunc("GET /swagger/", httpSwagger.Handler(
-		httpSwagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", httpPort)),
-	))
+	mux.HandleFunc("GET /api/v1/ping", r.loggingMiddleware(r.ping))
+	mux.HandleFunc("GET /api/v1/me", r.loggingMiddleware(r.protectedMiddleware(r.me)))
+	mux.HandleFunc("POST /api/v1/login", r.loggingMiddleware(r.login))
+	mux.HandleFunc("POST /api/v1/token/refresh", r.loggingMiddleware(r.injectionMiddleware(r.refreshToken)))
+	mux.HandleFunc("POST /api/v1/logout", r.loggingMiddleware(r.protectedMiddleware(r.logout)))
+	mux.HandleFunc("GET /swagger/", r.loggingMiddleware(httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8081/swagger/doc.json"),
+	)))
 	return nil
 }
 

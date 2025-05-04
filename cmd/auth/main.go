@@ -17,7 +17,7 @@ import (
 //	@version		1.0
 //	@description	This is the API for the Auth Service.
 
-//	@host		localhost:8080
+//	@host		localhost:8081
 //	@BasePath	/api/v1
 
 // @securityDefinitions.apiKey	ApiKeyAuthBasic

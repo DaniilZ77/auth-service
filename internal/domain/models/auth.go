@@ -15,6 +15,7 @@ type Session struct {
 	CreatedAt        time.Time
 }
 
+// All information about tokens: both access, refresh tokens and session id, user id from access token
 type TokensInfo struct {
 	SessionID    string
 	UserID       string

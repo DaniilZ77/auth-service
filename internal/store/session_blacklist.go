@@ -13,6 +13,7 @@ func NewSessionBlacklist() *SessionBlacklist {
 	}
 }
 
+// Check if session id in a blacklist
 func (bl *SessionBlacklist) In(sessionID string) bool {
 	bl.mutex.RLock()
 	defer bl.mutex.RUnlock()
@@ -20,6 +21,7 @@ func (bl *SessionBlacklist) In(sessionID string) bool {
 	return ok
 }
 
+// Add session id to a black list
 func (bl *SessionBlacklist) Add(sessionID string) {
 	bl.mutex.Lock()
 	defer bl.mutex.Unlock()

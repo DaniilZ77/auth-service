@@ -1,7 +1,7 @@
-http_port: localhost:8080
+http_port: localhost:8081
 jwt_secret: secret
 access_token_ttl: 2m
 refresh_token_ttl: 10h
 db_url: postgres://postgres:postgres@localhost:5432/auth
 log_level: info
-webhook_url: https://webhook.site/1f1b0e5d-6af8-4dc7-8b88-7cbfc8463f36
+webhook_url: http://localhost:9091/webhook

@@ -36,7 +36,7 @@ func (r *router) getRequestIP(w http.ResponseWriter, req *http.Request) (string,
 	return ip, nil
 }
 
-func (r *router) getTokenClaimsFromContext(w http.ResponseWriter, req *http.Request) (*models.TokenClaims, error) {
+func (r *router) getTokenClaims(w http.ResponseWriter, req *http.Request) (*models.TokenClaims, error) {
 	tokenClaims, err := getTokenClaimsFromContext(req.Context())
 	if err != nil {
 		r.log.Error("failed to get token claims from context", slog.Any("error", err))
@@ -57,14 +57,8 @@ func (r *router) getTokenClaimsFromContext(w http.ResponseWriter, req *http.Requ
 // @Failure		400	{object}	models.Response
 // @Router			/me [get]
 func (r *router) me(w http.ResponseWriter, req *http.Request) {
-	tokenClaims, err := r.getTokenClaimsFromContext(w, req)
+	tokenClaims, err := r.getTokenClaims(w, req)
 	if err != nil {
-		return
-	}
-
-	if err := r.authService.CheckSession(req.Context(), tokenClaims.SessionID); err != nil {
-		r.log.Warn("bad session id", slog.Any("error", err))
-		r.response(w, http.StatusBadRequest, models.NewErrorResponse(err.Error()))
 		return
 	}
 
@@ -77,8 +71,8 @@ func (r *router) me(w http.ResponseWriter, req *http.Request) {
 // @ID				login
 // @Accept			json
 // @Produce		json
-// @Param			user_id	query		string	true	"user id"	Format(uuid)
-// @Success		200		{object}	models.Response
+// @Param			user_id	query		string	true	"user id"	format(uuid)	example(1fe0f4a0-9de9-4192-93b8-1a702b1eda2d)
+// @Success		200		{object}	models.Response{data=models.TokensResponse}
 // @Failure		400		{object}	models.Response
 // @Failure		500		{object}	models.Response
 // @Router			/login [post]
@@ -118,7 +112,7 @@ func (r *router) login(w http.ResponseWriter, req *http.Request) {
 // @Accept			json
 // @Produce		json
 // @Param			refresh_token	body		models.TokenRequest	true	"refresh token"
-// @Success		200				{object}	models.Response
+// @Success		200				{object}	models.Response{data=models.TokensResponse}
 // @Failure		400				{object}	models.Response
 // @Failure		401				{object}	models.Response
 // @Failure		500				{object}	models.Response
@@ -131,7 +125,7 @@ func (r *router) refreshToken(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tokenClaims, err := r.getTokenClaimsFromContext(w, req)
+	tokenClaims, err := r.getTokenClaims(w, req)
 	if err != nil {
 		return
 	}
@@ -179,7 +173,7 @@ func (r *router) refreshToken(w http.ResponseWriter, req *http.Request) {
 // @Failure		500	{object}	models.Response
 // @Router			/logout [post]
 func (r *router) logout(w http.ResponseWriter, req *http.Request) {
-	tokenClaims, err := r.getTokenClaimsFromContext(w, req)
+	tokenClaims, err := r.getTokenClaims(w, req)
 	if err != nil {
 		return
 	}
