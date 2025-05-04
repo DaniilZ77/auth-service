@@ -83,8 +83,7 @@ func (r *router) login(w http.ResponseWriter, req *http.Request) {
 	}
 
 	var err error
-	requestMeta := &domain.RequestMeta{}
-	requestMeta.UserAgent = req.Header.Get("User-Agent")
+	requestMeta := &domain.RequestMeta{UserAgent: req.Header.Get("User-Agent")}
 	requestMeta.IP, err = r.getRequestIP(w, req)
 	if err != nil {
 		return
