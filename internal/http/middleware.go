@@ -30,7 +30,7 @@ func (r *router) protectedMiddleware(next http.HandlerFunc, canExpire bool) http
 		}
 
 		tokenClaims, err := r.tokenHandler.ParseToken(token)
-		if err != nil && !(errors.Is(err, jwt.ErrTokenExpired) && canExpire) {
+		if err != nil && (!errors.Is(err, jwt.ErrTokenExpired) || !canExpire) {
 			r.log.Warn("invalid token", slog.Any("error", err))
 			r.response(w, http.StatusUnauthorized, models.NewErrorResponse(err.Error()))
 			return

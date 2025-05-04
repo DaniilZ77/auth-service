@@ -90,7 +90,15 @@ func (s *SessionStore) RotateSession(ctx context.Context, oldSessionID string, n
 		return fail(err)
 	}
 
-	_, err = s.db.DB.ExecContext(ctx, "insert into sessions (id, refresh_token_hash, is_revoked, expiry) values ($1, $2, $3, $4)", newSession.ID, newSession.RefreshTokenHash, newSession.IsRevoked, newSession.Expiry)
+	_, err = tx.ExecContext(
+		ctx,
+		"insert into sessions (id, refresh_token_hash, is_revoked, user_agent, ip_address, expiry) values ($1, $2, $3, $4, $5, $6)",
+		newSession.ID,
+		newSession.RefreshTokenHash,
+		newSession.IsRevoked,
+		newSession.UserAgent,
+		newSession.IpAddress,
+		newSession.Expiry)
 	if err != nil {
 		return fail(err)
 	}

@@ -15,7 +15,7 @@ import (
 
 //go:generate mockery --name=AuthService --case=snake --inpackage --inpackage-suffix --with-expecter
 type AuthService interface {
-	Login(ctx context.Context, userID, userAgent string) (tokens *domain.TokensInfo, err error)
+	Login(ctx context.Context, userID string, requestMeta *domain.RequestMeta) (tokens *domain.TokensInfo, err error)
 	RefreshToken(ctx context.Context, oldTokens *domain.TokensInfo, requestMeta *domain.RequestMeta) (newTokens *domain.TokensInfo, err error)
 	Logout(ctx context.Context, sessionID string) error
 	CheckSession(ctx context.Context, sessionID string) error
@@ -26,11 +26,39 @@ type TokenHandler interface {
 	ParseToken(token string) (*models.TokenClaims, error)
 }
 
-func (r *router) me(w http.ResponseWriter, req *http.Request) {
+func (r *router) getRequestIP(w http.ResponseWriter, req *http.Request) (string, error) {
+	ip, _, err := net.SplitHostPort(req.RemoteAddr)
+	if err != nil {
+		r.log.Error("failed to get client ip", slog.Any("error", err))
+		r.response(w, http.StatusInternalServerError, models.NewErrorResponse(err.Error()))
+		return "", err
+	}
+	return ip, nil
+}
+
+func (r *router) getTokenClaimsFromContext(w http.ResponseWriter, req *http.Request) (*models.TokenClaims, error) {
 	tokenClaims, err := getTokenClaimsFromContext(req.Context())
 	if err != nil {
-		r.log.Error("failed to get token claims from context")
+		r.log.Error("failed to get token claims from context", slog.Any("error", err))
 		r.response(w, http.StatusInternalServerError, models.NewErrorResponse(err.Error()))
+		return nil, err
+	}
+	return tokenClaims, nil
+}
+
+// @Summary		Get user id
+// @Tags			Me
+// @Description	Get user id from access token
+// @ID				me
+// @Security		ApiKeyAuthBasic
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	models.Response
+// @Failure		400	{object}	models.Response
+// @Router			/me [get]
+func (r *router) me(w http.ResponseWriter, req *http.Request) {
+	tokenClaims, err := r.getTokenClaimsFromContext(w, req)
+	if err != nil {
 		return
 	}
 
@@ -43,6 +71,17 @@ func (r *router) me(w http.ResponseWriter, req *http.Request) {
 	r.response(w, http.StatusOK, models.NewOKResponse(tokenClaims.UserID))
 }
 
+// @Summary		Login
+// @Tags			Auth
+// @Description	Login with user id
+// @ID				login
+// @Accept			json
+// @Produce		json
+// @Param			user_id	query		string	true	"user id"	Format(uuid)
+// @Success		200		{object}	models.Response
+// @Failure		400		{object}	models.Response
+// @Failure		500		{object}	models.Response
+// @Router			/login [post]
 func (r *router) login(w http.ResponseWriter, req *http.Request) {
 	userID := req.URL.Query().Get("user_id")
 	if err := uuid.Validate(userID); err != nil {
@@ -51,8 +90,14 @@ func (r *router) login(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userAgent := req.Header.Get("User-Agent")
-	tokens, err := r.authService.Login(req.Context(), userID, userAgent)
+	var err error
+	requestMeta := &domain.RequestMeta{}
+	requestMeta.UserAgent = req.Header.Get("User-Agent")
+	requestMeta.IP, err = r.getRequestIP(w, req)
+	if err != nil {
+		return
+	}
+	tokens, err := r.authService.Login(req.Context(), userID, requestMeta)
 	if err != nil {
 		r.log.Error("failed to login", slog.Any("error", err))
 		r.response(w, http.StatusInternalServerError, models.NewErrorResponse(err.Error()))
@@ -65,6 +110,19 @@ func (r *router) login(w http.ResponseWriter, req *http.Request) {
 	}))
 }
 
+// @Summary		Refresh
+// @Tags			Auth
+// @Description	Refresh tokens with both access and refresh tokens
+// @ID				refresh
+// @Security		ApiKeyAuthBasic
+// @Accept			json
+// @Produce		json
+// @Param			refresh_token	body		models.TokenRequest	true	"refresh token"
+// @Success		200				{object}	models.Response
+// @Failure		400				{object}	models.Response
+// @Failure		401				{object}	models.Response
+// @Failure		500				{object}	models.Response
+// @Router			/token/refresh [post]
 func (r *router) refreshToken(w http.ResponseWriter, req *http.Request) {
 	var tokenRequest *models.TokenRequest
 	if err := json.NewDecoder(req.Body).Decode(&tokenRequest); err != nil {
@@ -72,25 +130,14 @@ func (r *router) refreshToken(w http.ResponseWriter, req *http.Request) {
 		r.response(w, http.StatusBadRequest, models.NewErrorResponse(err.Error()))
 		return
 	}
-	if tokenRequest.RefreshToken == "" {
-		r.log.Warn("refresh token is empty")
-		r.response(w, http.StatusBadRequest, models.NewErrorResponse("refresh token is empty"))
+
+	tokenClaims, err := r.getTokenClaimsFromContext(w, req)
+	if err != nil {
 		return
 	}
-
-	tokenClaims, err := getTokenClaimsFromContext(req.Context())
+	requestMeta := &domain.RequestMeta{UserAgent: req.Header.Get("User-Agent")}
+	requestMeta.IP, err = r.getRequestIP(w, req)
 	if err != nil {
-		r.log.Error("failed to get token claims from context", slog.Any("error", err))
-		r.response(w, http.StatusInternalServerError, models.NewErrorResponse(err.Error()))
-		return
-	}
-
-	requestMeta := &domain.RequestMeta{}
-	requestMeta.UserAgent = req.Header.Get("User-Agent")
-	requestMeta.IP, _, err = net.SplitHostPort(req.RemoteAddr)
-	if err != nil {
-		r.log.Error("failed to get client ip", slog.Any("error", err))
-		r.response(w, http.StatusInternalServerError, models.NewErrorResponse(err.Error()))
 		return
 	}
 	oldTokens := &domain.TokensInfo{
@@ -121,11 +168,19 @@ func (r *router) refreshToken(w http.ResponseWriter, req *http.Request) {
 	}))
 }
 
+// @Summary		Logout
+// @Tags			Auth
+// @Description	Logout with access token
+// @ID				logout
+// @Security		ApiKeyAuthBasic
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	models.Response
+// @Failure		500	{object}	models.Response
+// @Router			/logout [post]
 func (r *router) logout(w http.ResponseWriter, req *http.Request) {
-	tokenClaims, err := getTokenClaimsFromContext(req.Context())
+	tokenClaims, err := r.getTokenClaimsFromContext(w, req)
 	if err != nil {
-		r.log.Error("failed to get token claims from context", slog.Any("error", err))
-		r.response(w, http.StatusInternalServerError, models.NewErrorResponse(err.Error()))
 		return
 	}
 
@@ -134,4 +189,16 @@ func (r *router) logout(w http.ResponseWriter, req *http.Request) {
 		r.response(w, http.StatusInternalServerError, models.NewErrorResponse(err.Error()))
 		return
 	}
+}
+
+// @Summary		Ping
+// @Tags			Ping
+// @Description	Check health of the service
+// @ID				ping
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	models.Response
+// @Router			/ping [get]
+func (r *router) ping(w http.ResponseWriter, req *http.Request) {
+	r.response(w, http.StatusOK, models.NewOKResponse("pong"))
 }

@@ -88,7 +88,7 @@ func NewAuthService(
 	}, nil
 }
 
-func (a *AuthService) newSession(refreshToken, userAgent string) (*models.Session, error) {
+func (a *AuthService) newSession(refreshToken string, requestMeta *models.RequestMeta) (*models.Session, error) {
 	refreshTokenHash, err := bcrypt.GenerateFromPassword([]byte(refreshToken), bcrypt.DefaultCost)
 	if err != nil {
 		a.log.Error("failed to create session", slog.Any("error", err))
@@ -98,16 +98,17 @@ func (a *AuthService) newSession(refreshToken, userAgent string) (*models.Sessio
 	return &models.Session{
 		ID:               uuid.NewString(),
 		RefreshTokenHash: string(refreshTokenHash),
-		UserAgent:        userAgent,
+		UserAgent:        requestMeta.UserAgent,
+		IpAddress:        requestMeta.IP,
 		Expiry:           time.Now().Add(a.refreshTokenTTL),
 	}, nil
 }
 
-func (a *AuthService) Login(ctx context.Context, userID, userAgent string) (tokens *models.TokensInfo, err error) {
+func (a *AuthService) Login(ctx context.Context, userID string, requestMeta *models.RequestMeta) (tokens *models.TokensInfo, err error) {
 	tokens = &models.TokensInfo{}
 
 	tokens.RefreshToken = uuid.NewString()
-	newSession, err := a.newSession(tokens.RefreshToken, userAgent)
+	newSession, err := a.newSession(tokens.RefreshToken, requestMeta)
 	if err != nil {
 		return nil, err
 	}
@@ -135,9 +136,6 @@ func (a *AuthService) validateSessions(
 	}
 	if oldSession.Expiry.Before(time.Now()) {
 		return &models.DomainError{Err: models.ErrSessionExpired}
-	}
-	if oldSession.ID != oldTokens.SessionID {
-		return &models.DomainError{Err: models.ErrSessionIDMismatch}
 	}
 	if oldSession.UserAgent != requestMeta.UserAgent {
 		return &models.DomainError{Err: models.ErrUserAgentMismatch}
@@ -192,7 +190,7 @@ func (a *AuthService) RefreshToken(ctx context.Context, oldTokens *models.Tokens
 
 	if err := a.validateSessions(oldTokens, requestMeta, oldSession); err != nil {
 		if errors.Is(err, models.ErrUserAgentMismatch) {
-			if err = a.Logout(ctx, oldSession.ID); err != nil {
+			if err := a.Logout(ctx, oldSession.ID); err != nil {
 				a.log.Error("failed to logout", slog.Any("error", err))
 			}
 		}
@@ -208,7 +206,7 @@ func (a *AuthService) RefreshToken(ctx context.Context, oldTokens *models.Tokens
 	}
 
 	newRefreshToken := uuid.NewString()
-	newSession, err := a.newSession(newRefreshToken, requestMeta.UserAgent)
+	newSession, err := a.newSession(newRefreshToken, requestMeta)
 	if err != nil {
 		return nil, err
 	}

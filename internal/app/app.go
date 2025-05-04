@@ -80,7 +80,7 @@ func NewApp(config *config.Config, log *slog.Logger) (*App, error) {
 	}
 
 	mux := http.NewServeMux()
-	if err := router.NewRouter(mux, authService, tokenHandler, log); err != nil {
+	if err := router.NewRouter(mux, config.HttpPort, authService, tokenHandler, log); err != nil {
 		return nil, fmt.Errorf("failed to create router: %w", err)
 	}
 	httpServer := &http.Server{

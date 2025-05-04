@@ -69,9 +69,9 @@ func (_c *MockAuthService_CheckSession_Call) RunAndReturn(run func(context.Conte
 	return _c
 }
 
-// Login provides a mock function with given fields: ctx, userID, userAgent
-func (_m *MockAuthService) Login(ctx context.Context, userID string, userAgent string) (*models.TokensInfo, error) {
-	ret := _m.Called(ctx, userID, userAgent)
+// Login provides a mock function with given fields: ctx, userID, requestMeta
+func (_m *MockAuthService) Login(ctx context.Context, userID string, requestMeta *models.RequestMeta) (*models.TokensInfo, error) {
+	ret := _m.Called(ctx, userID, requestMeta)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Login")
@@ -79,19 +79,19 @@ func (_m *MockAuthService) Login(ctx context.Context, userID string, userAgent s
 
 	var r0 *models.TokensInfo
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*models.TokensInfo, error)); ok {
-		return rf(ctx, userID, userAgent)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *models.RequestMeta) (*models.TokensInfo, error)); ok {
+		return rf(ctx, userID, requestMeta)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) *models.TokensInfo); ok {
-		r0 = rf(ctx, userID, userAgent)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *models.RequestMeta) *models.TokensInfo); ok {
+		r0 = rf(ctx, userID, requestMeta)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*models.TokensInfo)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, userID, userAgent)
+	if rf, ok := ret.Get(1).(func(context.Context, string, *models.RequestMeta) error); ok {
+		r1 = rf(ctx, userID, requestMeta)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -107,14 +107,14 @@ type MockAuthService_Login_Call struct {
 // Login is a helper method to define mock.On call
 //   - ctx context.Context
 //   - userID string
-//   - userAgent string
-func (_e *MockAuthService_Expecter) Login(ctx interface{}, userID interface{}, userAgent interface{}) *MockAuthService_Login_Call {
-	return &MockAuthService_Login_Call{Call: _e.mock.On("Login", ctx, userID, userAgent)}
+//   - requestMeta *models.RequestMeta
+func (_e *MockAuthService_Expecter) Login(ctx interface{}, userID interface{}, requestMeta interface{}) *MockAuthService_Login_Call {
+	return &MockAuthService_Login_Call{Call: _e.mock.On("Login", ctx, userID, requestMeta)}
 }
 
-func (_c *MockAuthService_Login_Call) Run(run func(ctx context.Context, userID string, userAgent string)) *MockAuthService_Login_Call {
+func (_c *MockAuthService_Login_Call) Run(run func(ctx context.Context, userID string, requestMeta *models.RequestMeta)) *MockAuthService_Login_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		run(args[0].(context.Context), args[1].(string), args[2].(*models.RequestMeta))
 	})
 	return _c
 }
@@ -124,7 +124,7 @@ func (_c *MockAuthService_Login_Call) Return(tokens *models.TokensInfo, err erro
 	return _c
 }
 
-func (_c *MockAuthService_Login_Call) RunAndReturn(run func(context.Context, string, string) (*models.TokensInfo, error)) *MockAuthService_Login_Call {
+func (_c *MockAuthService_Login_Call) RunAndReturn(run func(context.Context, string, *models.RequestMeta) (*models.TokensInfo, error)) *MockAuthService_Login_Call {
 	_c.Call.Return(run)
 	return _c
 }

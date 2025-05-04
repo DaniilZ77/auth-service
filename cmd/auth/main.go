@@ -13,6 +13,17 @@ import (
 	"github.com/DaniilZ77/auth-service/internal/config"
 )
 
+//	@title			Auth Service API
+//	@version		1.0
+//	@description	This is the API for the Auth Service.
+
+//	@host		localhost:8080
+//	@BasePath	/api/v1
+
+// @securityDefinitions.apiKey	ApiKeyAuthBasic
+// @in							header
+// @name						Authorization
+// @description				Authorization token in the format "Bearer your_token"
 func main() {
 	config := config.MustConfig()
 	log := newLogger(config.LogLevel)

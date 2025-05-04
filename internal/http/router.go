@@ -3,10 +3,13 @@ package http
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
+	_ "github.com/DaniilZ77/auth-service/docs"
 	"github.com/DaniilZ77/auth-service/internal/models"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 const (
@@ -22,10 +25,14 @@ type router struct {
 
 func NewRouter(
 	mux *http.ServeMux,
+	httpPort string,
 	authService AuthService,
 	tokenHandler TokenHandler,
 	log *slog.Logger,
 ) error {
+	if httpPort == "" {
+		return errors.New("http port cannot be empty")
+	}
 	if mux == nil {
 		return errors.New("mux cannot be nil")
 	}
@@ -43,10 +50,14 @@ func NewRouter(
 		tokenHandler: tokenHandler,
 		log:          log,
 	}
+	mux.HandleFunc("GET /api/v1/ping", r.ping)
 	mux.HandleFunc("GET /api/v1/me", r.protectedMiddleware(r.me, cannotExpire))
 	mux.HandleFunc("POST /api/v1/login", r.login)
 	mux.HandleFunc("POST /api/v1/token/refresh", r.protectedMiddleware(r.refreshToken, canExpire))
 	mux.HandleFunc("POST /api/v1/logout", r.protectedMiddleware(r.logout, cannotExpire))
+	mux.HandleFunc("GET /swagger/", httpSwagger.Handler(
+		httpSwagger.URL(fmt.Sprintf("http://%s/swagger/doc.json", httpPort)),
+	))
 	return nil
 }
 

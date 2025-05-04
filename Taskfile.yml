@@ -32,3 +32,7 @@ tasks:
   migrate-down:
     cmds:
       - migrate -path ./internal/data -database '{{.DB_URL}}?sslmode=disable' down
+  swagger:
+    cmds:
+      - swag fmt
+      - swag init -g ./cmd/auth/main.go
