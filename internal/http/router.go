@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -50,7 +51,7 @@ func NewRouter(
 	mux.HandleFunc("POST /api/v1/token/refresh", r.loggingMiddleware(r.injectionMiddleware(r.refreshToken)))
 	mux.HandleFunc("POST /api/v1/logout", r.loggingMiddleware(r.protectedMiddleware(r.logout)))
 	mux.HandleFunc("GET /swagger/", r.loggingMiddleware(httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:8081/swagger/doc.json"),
+		httpSwagger.URL(fmt.Sprintf("http://localhost:%s/swagger/doc.json", httpPort)),
 	)))
 	return nil
 }

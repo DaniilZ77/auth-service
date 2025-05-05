@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"time"
 
@@ -79,8 +80,13 @@ func NewApp(config *config.Config, log *slog.Logger) (*App, error) {
 		return nil, fmt.Errorf("failed to create auth service: %w", err)
 	}
 
+	_, httpPort, err := net.SplitHostPort(config.HttpPort)
+	if err != nil {
+		return nil, fmt.Errorf("invalid http port in config: %w", err)
+	}
+
 	mux := http.NewServeMux()
-	if err := router.NewRouter(mux, config.HttpPort, authService, tokenHandler, log); err != nil {
+	if err := router.NewRouter(mux, httpPort, authService, tokenHandler, log); err != nil {
 		return nil, fmt.Errorf("failed to create router: %w", err)
 	}
 	httpServer := &http.Server{
