@@ -14,5 +14,5 @@ type TokensResponse struct {
 }
 
 type TokenRequest struct {
-	RefreshToken string `json:"refresh_token" example:"1fe0f4a0-9de9-4192-93b8-1a702b1eda2d"`
+	RefreshToken string `json:"refresh_token" example:"CsrrFNwASI2LBcsLK3uehw=="`
 }
