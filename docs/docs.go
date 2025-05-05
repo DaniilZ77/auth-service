@@ -146,6 +146,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.Response"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
                     }
                 }
             }
