@@ -175,7 +175,7 @@ func (a *AuthService) sendWebhook(payload map[string]string) {
 
 	req, err := http.NewRequest(http.MethodPost, a.webhookURL, bytes.NewReader(body))
 	if err != nil {
-		a.log.Error("failed send request", slog.Any("error", err))
+		a.log.Error("failed to create request", slog.Any("error", err))
 		return
 	}
 	for retries > 0 {
