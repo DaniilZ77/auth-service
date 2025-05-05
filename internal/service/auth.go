@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -89,6 +90,11 @@ func NewAuthService(
 	}, nil
 }
 
+func (a *AuthService) newRefreshToken() string {
+	refreshToken := uuid.New()
+	return base64.StdEncoding.EncodeToString(refreshToken[:])
+}
+
 func (a *AuthService) newSession(refreshToken string, requestMeta *models.RequestMeta) (*models.Session, error) {
 	refreshTokenHash, err := bcrypt.GenerateFromPassword([]byte(refreshToken), defaultBcryptCost)
 	if err != nil {
@@ -109,7 +115,7 @@ func (a *AuthService) newSession(refreshToken string, requestMeta *models.Reques
 func (a *AuthService) Login(ctx context.Context, userID string, requestMeta *models.RequestMeta) (tokens *models.TokensInfo, err error) {
 	tokens = &models.TokensInfo{}
 
-	tokens.RefreshToken = uuid.NewString()
+	tokens.RefreshToken = a.newRefreshToken()
 	newSession, err := a.newSession(tokens.RefreshToken, requestMeta)
 	if err != nil {
 		return nil, err
@@ -212,7 +218,7 @@ func (a *AuthService) RefreshToken(ctx context.Context, oldTokens *models.Tokens
 		})
 	}
 
-	newRefreshToken := uuid.NewString()
+	newRefreshToken := a.newRefreshToken()
 	newSession, err := a.newSession(newRefreshToken, requestMeta)
 	if err != nil {
 		return nil, err

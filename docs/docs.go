@@ -260,7 +260,7 @@ const docTemplate = `{
             "properties": {
                 "refresh_token": {
                     "type": "string",
-                    "example": "1fe0f4a0-9de9-4192-93b8-1a702b1eda2d"
+                    "example": "CsrrFNwASI2LBcsLK3uehw=="
                 }
             }
         },
